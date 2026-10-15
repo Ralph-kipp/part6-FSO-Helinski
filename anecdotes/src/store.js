@@ -20,7 +20,9 @@ const asObject = anecdote => ({
 
 const useAnecdoteStore = create((set) => ({
   anecdotes: anecdotesAtStart.map(asObject),
+  filter: '',
   actions: {
+    setFilter: value => set(() => ({ filter: value })),
     vote: id => set(state => ({
       anecdotes: state.anecdotes.map(a => a.id === id ? { ...a, votes: a.votes + 1 } : a)
     })),
@@ -32,5 +34,11 @@ const useAnecdoteStore = create((set) => ({
   },
 }))
 
-export const useAnecdotes = () => useAnecdoteStore((state) => state.anecdotes)
+export const useAnecdotes = () => {
+  const anecdotes = useAnecdoteStore((state) => state.anecdotes)
+  const filter = useAnecdoteStore((state) => state.filter)
+
+  // filtering happens here, outside the selectors, so the selectors keep returning stable values
+  return anecdotes.filter(a => a.content.toLowerCase().includes(filter.toLowerCase()))
+}
 export const useAnecdoteActions = () => useAnecdoteStore((state) => state.actions)
