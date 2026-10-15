@@ -1,13 +1,18 @@
 import { useAnecdoteActions } from "../store"
+import { useNotificationActions } from "../notificationStore"
 
 const AnecdoteForm = () => {
   const { create } = useAnecdoteActions()
+  const { notify } = useNotificationActions()
 
   const onCreate = async (e) => {
     e.preventDefault()
     const form = e.target
     const content = form.anecdote.value.trim()
-    if (content) await create(content)  // ignore empty submissions
+    if (content) {                      // ignore empty submissions
+      await create(content)
+      notify(`you created '${content}'`)
+    }
     form.reset()
   }
 
