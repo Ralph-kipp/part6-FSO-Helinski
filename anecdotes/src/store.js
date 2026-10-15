@@ -2,7 +2,7 @@
 import { create } from 'zustand'
 import anecdoteService from './services/anecdotes'
 
-const useAnecdoteStore = create((set) => ({
+const useAnecdoteStore = create((set, get) => ({
   anecdotes: [],
   filter: '',
   actions: {
@@ -11,9 +11,23 @@ const useAnecdoteStore = create((set) => ({
       set(() => ({ anecdotes }))
     },
     setFilter: value => set(() => ({ filter: value })),
-    vote: id => set(state => ({
-      anecdotes: state.anecdotes.map(a => a.id === id ? { ...a, votes: a.votes + 1 } : a)
-    })),
+    vote: async (id) => {
+      const anecdote = get().anecdotes.find(a => a.id === id)
+      const updated = { ...anecdote, votes: anecdote.votes + 1 }
+
+      // update the page first, so a quick second click builds on this vote instead of overwriting it
+      set(state => ({ anecdotes: state.anecdotes.map(a => a.id === id ? updated : a) }))
+
+      try {
+        await anecdoteService.update(id, updated)
+      } catch (error) {
+        // saving failed: take back only this one vote
+        set(state => ({
+          anecdotes: state.anecdotes.map(a => a.id === id ? { ...a, votes: a.votes - 1 } : a)
+        }))
+        throw error
+      }
+    },
     create: async (content) => {
       const newAnecdote = await anecdoteService.createNew(content)
       set(state => ({ anecdotes: state.anecdotes.concat(newAnecdote) }))
