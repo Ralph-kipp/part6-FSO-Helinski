@@ -3,11 +3,12 @@ import { useAnecdoteActions } from "../store"
 const AnecdoteForm = () => {
   const { create } = useAnecdoteActions()
 
-  const onCreate = (e) => {
+  const onCreate = async (e) => {
     e.preventDefault()
-    const content = e.target.anecdote.value.trim()
-    if (content) create(content)        // ignore empty submissions
-    e.target.reset()
+    const form = e.target
+    const content = form.anecdote.value.trim()
+    if (content) await create(content)  // ignore empty submissions
+    form.reset()
   }
 
   return (
