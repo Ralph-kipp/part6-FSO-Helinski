@@ -1,8 +1,11 @@
+import { useContext } from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import NotificationContext from '../NotificationContext'
 import { createAnecdote, getAnecdotes, updateAnecdote } from '../requests'
 
 export const useAnecdotes = () => {
   const queryClient = useQueryClient()
+  const { notify } = useContext(NotificationContext)
 
   const result = useQuery({
     queryKey: ['anecdotes'],
@@ -19,6 +22,7 @@ export const useAnecdotes = () => {
       queryClient.setQueryData(['anecdotes'], (anecdotes) =>
         anecdotes.concat(newAnecdote)
       )
+      notify(`you created '${newAnecdote.content}'`)
     },
   })
 
@@ -32,9 +36,12 @@ export const useAnecdotes = () => {
         anecdotes.map((a) => (a.id === updated.id ? updated : a))
       )
     },
-    // Undo only this one vote, then resync with the server. The server
-    // response is deliberately not written to the cache on success: a late
-    // response must not overwrite a newer local count.
+    // The server response is deliberately not written to the cache on
+    // success: a late response must not overwrite a newer local count.
+    onSuccess: (updated) => {
+      notify(`you voted '${updated.content}'`)
+    },
+    // Undo only this one vote, then resync with the server.
     onError: (error, updated) => {
       queryClient.setQueryData(['anecdotes'], (anecdotes) =>
         anecdotes.map((a) =>
