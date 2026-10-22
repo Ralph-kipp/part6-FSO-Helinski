@@ -43,8 +43,11 @@ export const useAnecdotes = () => {
   const anecdotes = useAnecdoteStore((state) => state.anecdotes)
   const filter = useAnecdoteStore((state) => state.filter)
 
-  // filtering happens here, outside the selectors, so the selectors keep returning stable values
-  return anecdotes.filter(a => a.content.toLowerCase().includes(filter.toLowerCase()))
+  // filtering and sorting happen here, outside the selectors, so the selectors keep returning stable values
+  // toSorted returns a sorted copy, so the state in the store is never mutated
+  return anecdotes
+    .filter(a => a.content.toLowerCase().includes(filter.toLowerCase()))
+    .toSorted((a, b) => b.votes - a.votes)
 }
 export const useAnecdoteActions = () => useAnecdoteStore((state) => state.actions)
 

@@ -11,11 +11,9 @@ const AnecdoteList = () => {
     notify(`you voted '${anecdote.content}'`)   // only reached if the vote succeeded
   }
 
-  const sorted = anecdotes.toSorted((a, b) => b.votes - a.votes)   // sorted copy, store is not mutated
-
   return (
     <>
-      {sorted.map((anecdote) => (
+      {anecdotes.map((anecdote) => (
         <div key={anecdote.id}>
           <div>{anecdote.content}</div>
           <div>
