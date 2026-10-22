@@ -24,6 +24,9 @@ export const useAnecdotes = () => {
       )
       notify(`you created '${newAnecdote.content}'`)
     },
+    onError: (error) => {
+      notify(error.message)
+    },
   })
 
   const updateAnecdoteMutation = useMutation({
